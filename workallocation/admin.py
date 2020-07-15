@@ -1,10 +1,12 @@
 from django.contrib import admin
+from django.shortcuts import render
+from django.contrib import messages
 from import_export import resources
 
 # Register your models here.
 from import_export.admin import ImportMixin, ImportExportModelAdmin
 
-from workallocation.forms import WorkloadForm
+from workallocation.forms import WorkloadForm, BulkAllocationForm
 from workallocation.models import Workload, CaseStage
 
 
@@ -16,6 +18,9 @@ class WorkloadResource(resources.ModelResource):
 
 
 class WorkloadAdmin(ImportExportModelAdmin):
+    actions = ['bulk_allocation']
+    action_form = BulkAllocationForm
+
     list_display = (
         'case_number',
         'business_group',
@@ -41,6 +46,13 @@ class WorkloadAdmin(ImportExportModelAdmin):
                 case_stage=obj.case_stage
             )
         super().save_model(request, obj, form, change)
+
+    def bulk_allocation(self, request, queryset):
+        user = int(request.POST['user'])
+        queryset.update(allocated_user=user)
+        messages.success(request, '{0} cases were assigned'.format(queryset.count()))
+
+    bulk_allocation.short_description = 'Allocate'
 
 
 admin.site.site_header = 'Work Allocation Tool'

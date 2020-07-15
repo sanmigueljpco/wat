@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.admin.helpers import ActionForm
 from django.contrib.auth.models import User
 
 from workallocation.models import Workload
@@ -37,3 +38,7 @@ class WorkloadForm(forms.ModelForm):
             'category': forms.TextInput(attrs={'readonly': 'readonly'}),
             'sla_expiry_date': forms.TextInput(attrs={'readonly': 'readonly'})
         }
+
+
+class BulkAllocationForm(ActionForm):
+    user = forms.ModelChoiceField(queryset=User.objects.all())
